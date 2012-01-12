@@ -13,26 +13,48 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 public class StaticHttpService extends GenericServlet implements
 		BundleActivator {
-
+	
 	private static final long serialVersionUID = -420835724412643550L;
 	private ServiceTracker httpTracker;
 
-	public void start(BundleContext context) throws Exception {
+	public void start(final BundleContext context) throws Exception {
 		this.httpTracker = new ServiceTracker(context,
-				HttpService.class.getName(), null);
+				HttpService.class.getName(), 
+				new ServiceTrackerCustomizer(){
+
+					public Object addingService(ServiceReference reference) {
+						HttpService httpService = (HttpService) context.getService(reference);
+
+						try {
+							httpService.registerServlet("/editor", StaticHttpService.this, null, null);
+
+							httpService.registerResources("/editor/resources", "/resources", null);
+						} catch (Exception e) {
+							throw new RuntimeException(e);
+						} 
+						
+						return context.getService(reference);
+					}
+
+					public void modifiedService(ServiceReference reference,
+							Object service) {
+						//
+					}
+
+					public void removedService(ServiceReference reference,
+							Object service) {
+						//
+					}
+			
+		});
 		this.httpTracker.open();
-
-		HttpService httpService = (HttpService) httpTracker.getService();
-
-		httpService.registerServlet("/editor", this, null, null);
-
-		httpService.registerResources("/editor/resources", "/resources", null);
-
 	}
 
 	public void stop(BundleContext context) throws Exception {
