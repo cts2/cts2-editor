@@ -70,7 +70,7 @@ function onAfterChangeSetCommit(){
 
 
 function loadMapDropdowns(){
-	$.getJSON('maps?format=json', function(data) {
+	$.getJSON(urlPrefix+'maps?format=json', function(data) {
 		$('.mapDropDown').html('');
 		
 		$.each(data.entryList,function(index){
@@ -83,7 +83,7 @@ function loadMapDropdowns(){
 }
 
 function loadCodeSystemVersionDropdowns(){
-	$.getJSON('codesystemversions?format=json', function(data) {
+	$.getJSON(urlPrefix+'codesystemversions?format=json', function(data) {
 		$('.codeSystemVersionDropDown').html('');
 		
 		$.each(data.entryList,function(index){
