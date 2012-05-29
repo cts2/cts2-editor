@@ -20,7 +20,7 @@ var csvViewModel;
 var viewModel;
 
 var urlPrefix = "../";
-//var urlPrefix = "http://localhost:8080/webapp-rest/";
+//var urlPrefix = "http://localhost:8080/webapp/";
 
 var tab = 0;
 

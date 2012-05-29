@@ -95,6 +95,9 @@ ul {
 }
 
 .ui-autocomplete-loading {
-  background: url("images/loading.gif") right center no-repeat;
+ 	background: url("images/loading.gif") right center no-repeat;
 }
 
+#mapTargetButtonBar {
+	white-space: nowrap;
+}
