@@ -1363,8 +1363,9 @@ function doCreateEntity(name,namespace,about,csname,csvname,changeseturi) {
 		},
 		entityTypeList: [
 		                  {
-		                       "namespace": "ns",
-		                       "name": "class"
+		                       "namespace": "owl",
+		                       "name": "Class",
+		                       "uri":"http://www.w3.org/2002/07/owl#Class"
 		                   }
 
 		               ],
