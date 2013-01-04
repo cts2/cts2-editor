@@ -1342,10 +1342,19 @@ function createEmptyArrayIfNull(array){
 
 
 function updateChangeSetMetadata(url,changeInstructions,callback){
+      var data = {
+          'UpdateChangeSetMetadataRequest':
+            {
+                'updatedChangeInstructions':
+                {
+                    'changeInstructions':{'value': changeInstructions}
+                }
+            }
+      };
 	  $.ajax( {
 			"dataType": 'json', 
 			"contentType": "application/json",
-			"data": "{'updatedChangeInstructions':{'changeInstructions':{'value':{'content':'"+changeInstructions+"'}}}}",
+			"data": JSON.stringify(data),
 			"type": "POST", 
 			"url": urlPrefix+"./"+url,
 			"error":function (xhr, ajaxOptions, thrownError){
