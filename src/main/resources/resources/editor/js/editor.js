@@ -19,8 +19,8 @@ var csViewModel;
 var csvViewModel;
 var viewModel;
 
-var urlPrefix = "../";
-//var urlPrefix = "http://localhost:8080/webapp/";
+//var urlPrefix = "../";
+var urlPrefix = "http://localhost:8080/webapp-0.8.2-SNAPSHOT/";
 
 var tab = 0;
 
@@ -145,7 +145,7 @@ fnChangeSetObjectToArray = function ( )
 					$(this).html("<option>CURRENT</option>");
 				});
 				
-				json = json.entryList;
+				json = json.changeSetDirectory.entryList;
 				
 				for(i in json){
 					newJson.aaData[i] = new Array();
@@ -188,7 +188,7 @@ fnCodeSystemObjectToArray = function ( )
 				var newJson = new Object();
 				newJson.aaData = new Array();
 				
-				json = json.entryList;
+				json = json.codeSystemCatalogEntryDirectory.entryList;
 				
 				for(i in json){
 					newJson.aaData[i] = new Array();
@@ -245,7 +245,7 @@ fnEntityObjectToArray = function ( )
 				var newJson = new Object();
 				newJson.aaData = new Array();
 				
-				json = json.entryList;
+				json = json.entityDirectory.entryList;
 				
 				for(i in json){
 					newJson.aaData[i] = new Array();
@@ -326,7 +326,7 @@ function getChangeInstructions(json){
 		var opaqueData = json.changeSetElementGroup.changeInstructions;
 		
 		if(opaqueData != null){
-			instructions = opaqueData.value.content;
+			instructions = opaqueData.value;
 		}
 	}
 
@@ -337,7 +337,7 @@ function getResourceSynopsis(json){
 	var synopsis = "-- no description --";
 	
 	if(json.resourceSynopsis != null){
-		synopsis = json.resourceSynopsis.value.content;
+		synopsis = json.resourceSynopsis.value;
 	}
 
 	return synopsis;
@@ -442,7 +442,7 @@ function createEditCodeSystemVersionDialog(){
 				Cancel: function() {
 					$( this ).dialog( "close" );
 				}
-			},
+			}
 		});
 }
 
@@ -462,7 +462,7 @@ function createEditEntityDialog(){
 				Cancel: function() {
 					$( this ).dialog( "close" );
 				}
-			},
+			}
 		});
 }
 
@@ -540,7 +540,7 @@ function setResourceSynopsis(json,synopsis){
 		
 	}
 
-	json.resourceSynopsis.value.content = synopsis;
+	json.resourceSynopsis.value = synopsis;
 }
 
 function resetForm(formName){
@@ -963,28 +963,34 @@ $(document).ready(function() {
 				"success": function (json) {
 						
 						if(! viewModel){
-							viewModel = ko.mapping.fromJS(json);
-							
+							viewModel = ko.mapping.fromJS(json.entityDescriptionMsg);
+
 							viewModel.addDesignation = function () {
+                                viewModel.entityDescription.namedEntity.designationList =
+                                    createEmptyArrayIfNull(viewModel.entityDescription.namedEntity.designationList);
+
 								viewModel.entityDescription.namedEntity.designationList.push(
 										{
-											value:{content:ko.observable('--new-description--')},
+											value:ko.observable('--new-description--'),
 											designationRole:ko.observable('ALTERNATIVE')
 										}			
 								);
 							};
 							viewModel.addDefinition = function () {
+                                viewModel.entityDescription.namedEntity.definitionList =
+                                    createEmptyArrayIfNull(viewModel.entityDescription.namedEntity.definitionList);
+
 								viewModel.entityDescription.namedEntity.definitionList.push(
 										{
-											value:{content:ko.observable('--new-definition--')},
+											value:ko.observable('--new-definition--'),
 											definitionRole:ko.observable('NORMATIVE')
 										}			
 								);
 							};
-							
+
 							ko.applyBindings(viewModel, document.getElementById('entityEditForm'));
 						} else {
-							viewModel = ko.mapping.fromJS(json);
+							viewModel = ko.mapping.fromJS(json.entityDescriptionMsg);
 							ko.applyBindings(viewModel, document.getElementById('entityEditForm'));
 						}
 
@@ -1025,8 +1031,8 @@ $(document).ready(function() {
 						alert(jsonString);
 					},
 					"success": function (json) {
-						
-						var mapping = {
+
+						    var mapping = {
 							    'keywordList': {
 							        create: function(options) {
 							            return {keyword:ko.observable(options.data)};
@@ -1034,10 +1040,10 @@ $(document).ready(function() {
 							    }
 							};
 
-							csViewModel = ko.mapping.fromJS(json,mapping);
+							csViewModel = ko.mapping.fromJS(json.codeSystemCatalogEntryMsg, mapping);
 							
 							csViewModel.addDescription = function () {
-								csViewModel.codeSystemCatalogEntry.resourceSynopsis = {value:{content:ko.observable('--new-description--')}};
+								csViewModel.codeSystemCatalogEntry.resourceSynopsis = {value:ko.observable('--new-description--')};
 						        ko.applyBindings(csViewModel, document.getElementById('codeSystemEditForm'));   
 							};
 							
@@ -1047,19 +1053,27 @@ $(document).ready(function() {
 							};
 							
 							csViewModel.addComment = function () {
+                                csViewModel.codeSystemCatalogEntry.noteList =
+                                    createEmptyArrayIfNull(
+                                        csViewModel.codeSystemCatalogEntry.noteList);
+
 								csViewModel.codeSystemCatalogEntry.noteList.push( 
 										{
 											type:ko.observable('NOTE'),
-											value:{content:ko.observable('--new-comment--')}
+											value:ko.observable('--new-comment--')
 										}
 								);
+                                ko.applyBindings(csViewModel,document.getElementById('codeSystemEditForm'));
 							};
 							
 							csViewModel.addKeyword = function () {
+                                csViewModel.codeSystemCatalogEntry.keywordList =
+                                    createEmptyArrayIfNull(csViewModel.codeSystemCatalogEntry.keywordList);
+
 								csViewModel.codeSystemCatalogEntry.keywordList.push( {keyword:ko.observable('--new-keyword--')} );
+                                ko.applyBindings(csViewModel,document.getElementById('codeSystemEditForm'));
 							};
-		
-							
+
 							ko.applyBindings(csViewModel,document.getElementById('codeSystemEditForm'));
 	
 					   if(changeSetUri == 'CURRENT'){
@@ -1271,9 +1285,7 @@ function createEntity(){
 	
 	var csname = $("#entityCsSelect").val();
 	var csvname = $("#entityCsvSelect").val();
-	
-	
-	
+
 	doCreateEntity(name,namespace,about,csname,csvname,changeseturi);
 }
 
@@ -1320,6 +1332,14 @@ function createMapVersion(){
 	doCreateMapVersion(name,"CTS2 Development Framework Editor",about,versionof,fromRef,toRef,changeseturi);
 }
 
+function createEmptyArrayIfNull(array){
+    if(!array){
+        return new ko.observableArray([]);
+    } else {
+        return array;
+    }
+}
+
 
 function updateChangeSetMetadata(url,changeInstructions,callback){
 	  $.ajax( {
@@ -1356,23 +1376,26 @@ function createChangeSet(callback){
 
 function doCreateEntity(name,namespace,about,csname,csvname,changeseturi) {
 	
-	var json = {namedEntity:{
-		describingCodeSystemVersion:{
-			version:{content:csvname},
-			codeSystem:{content:csname}
-		},
-		entityTypeList: [
-		                  {
-		                       "namespace": "owl",
-		                       "name": "Class",
-		                       "uri":"http://www.w3.org/2002/07/owl#Class"
-		                   }
-
-		               ],
-		about: about,
-		entityID:{name:name, namespace:namespace}}};
+	var json =
+        {
+            namedEntity:{
+                describingCodeSystemVersion:{
+                    version:{content:csvname},
+                    codeSystem:{content:csname}
+                },
+		        entityTypeList: [
+                    {
+                       "namespace": "owl",
+                       "name": "Class",
+                       "uri":"http://www.w3.org/2002/07/owl#Class"
+                    }
+                ],
+		        about: about,
+		        entityID:{name:name, namespace:namespace}
+            }
+        };
 	
-	doCreate(json,"entity",changeseturi);
+	doCreate({entityDescription:json},"entity",changeseturi);
 }
 
 function doCreate(json,url,changeseturi,oncreate) {
@@ -1413,7 +1436,7 @@ function doCreate(json,url,changeseturi,oncreate) {
 
 function doCreateCodeSystem(csn,about,changeseturi) {
 	
-	var json = {"codeSystemName":csn,"about":about};
+	var json = {"codesSystemCatalogEntry": {"codeSystemName":csn,"about":about}};
 	
 	doCreate(json,"codesystem",changeseturi);
 }
@@ -1505,7 +1528,7 @@ function updateEntity(json) {
 	  
 	  data.namedEntity.changeableElementGroup.changeDescription.containingChangeSet = changeSetUri;
 
-	  var jsonString = $.toJSON(data);
+	  var jsonString = $.toJSON({'entityDescription':data});
 
 	  $.ajax( {
 			"dataType": 'json', 
@@ -1653,8 +1676,7 @@ function updateCodingScheme(data) {
 	  var newArray = adjustArray(data.keywordList, "keyword");
 	  data.keywordList = newArray;
 	  
-	  var jsonString = $.toJSON(data);
-	  
+	  var jsonString = $.toJSON({'codeSystemCatalogEntry':data});
 
 	  $.ajax( {
 			"dataType": 'json', 
@@ -1873,7 +1895,7 @@ function cloneMapTarget(model){
 			var mapTarget = {
 					name:data.name,
 					namespace:data.namespace,
-					uri:data.about,
+					uri:data.about
 			};
 			
 			model.entry.mapSetList()[0].mapTargetList.push(

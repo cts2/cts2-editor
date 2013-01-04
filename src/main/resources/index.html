@@ -1,7 +1,6 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<!-- <link rel="stylesheet"  type="text/css" href="resources/editor/css/start/jquery-ui-1.8rc2.custom.css"  /> -->
 <link rel="stylesheet" type="text/css"
 	href="resources/editor/jquery-ui-themes-1.8.17/themes/base/jquery.ui.all.css" />
 <link type="text/css" rel="stylesheet"
@@ -17,8 +16,6 @@
 	src="resources/editor/js/jquery.dataTables.min.js"></script>
 <script type="text/javascript"
 	src="resources/editor/js/jquery.json-2.3.min.js"></script>
-<!-- <script type="text/javascript" src="resources/editor/js/jquery.ui.selectmenu.js"></script> -->
-<!-- <script type="text/javascript" src="resources/editor/js/jquery-dynamic-form.js"></script> -->
 <script type="text/javascript" src="resources/editor/js/main.js"></script>
 <script type="text/javascript" src="resources/editor/js/jquery.tmpl.js"></script>
 <script type="text/javascript"
@@ -57,7 +54,7 @@
 <legend class="ui-widget-header ui-corner-all">Description</legend>
 <label for="description">Description </label>
 {{if $data.resourceSynopsis != null}}
-	<textarea name="description" id="description" data-bind="value: resourceSynopsis.value.content" class="text ui-widget-content ui-corner-all" />
+	<textarea name="description" id="description" data-bind="value: resourceSynopsis.value" class="text ui-widget-content ui-corner-all" />
 {{else}}
  	<a href="#" data-bind="click: function() { $root.addDescription() }">Add Description</a>
 {{/if}}
@@ -107,7 +104,7 @@
 
 <script id='commentTemplate' type='text/html'>
 	<select data-bind="options: ['CHANGENOTE','EDITORIALNOTE','HISTORYNOTE', 'SCOPENOTE', 'NOTE'], value: type " ></select>
-	<textarea data-bind="value: value.content" class="text ui-widget-content ui-corner-all" />
+	<textarea data-bind="value: value" class="text ui-widget-content ui-corner-all" />
 </script>
 
 
@@ -412,7 +409,7 @@
 								</tr>
 							</thead>
 							<tbody
-								data-bind='template: { name: "designationRowTemplate", foreach: entityDescription.namedEntity.designationList }'></tbody>
+								data-bind='template: { name: "designationRowTemplate", data: entityDescription.namedEntity }'></tbody>
 						</table>
 						<a href="#" data-bind="click: function() { addDesignation() }">Add
 							Description</a>
@@ -425,8 +422,10 @@
 									<th class="ui-state-default" rowspan="1" colspan="1">Role</th>
 								</tr>
 							</thead>
+                            <!--
 							<tbody
 								data-bind='template: { name: "definitionRowTemplate", foreach: entityDescription.namedEntity.definitionList }'></tbody>
+						    -->
 						</table>
 						<a href="#" data-bind="click: function() { addDefinition() }">Add
 							Definition</a>
@@ -435,22 +434,26 @@
 			</div>
 
 			<script type="text/html" id="designationRowTemplate">
+                {{if $data.designationList != null}}
+                {{each $data.designationList}}
 		<tr>
 			<td>
-				<textarea data-bind="value: value.content" class="text ui-widget-content ui-corner-all" />
+				<textarea data-bind="value: value" class="text ui-widget-content ui-corner-all" />
 			</td>
 			<td>
-				<select data-bind="options: ['PREFERRED','ALTERNATIVE','HIDDEN'], selectedOptions: designationRole" >
+				<select data-bind="options: ['PREFERRED','ALTERNATIVE','HIDDEN'], selectedOptions: designationRole" ></select>
 			</td>
 		</tr>
+                {{/each}}
+                {{/if}}
 	</script>
 			<script type="text/html" id="definitionRowTemplate">
 		<tr>
 			<td>
-				<textarea data-bind="value: value.content" class="text ui-widget-content ui-corner-all" />
+				<textarea data-bind="value: value" class="text ui-widget-content ui-corner-all" />
 			</td>
 			<td>
-				<select data-bind="options: ['NORMATIVE','INFORMATIVE'], value: definitionRole" >
+				<select data-bind="options: ['NORMATIVE','INFORMATIVE'], value: definitionRole" ></select>
 			</td>
 		</tr>
 	</script>
