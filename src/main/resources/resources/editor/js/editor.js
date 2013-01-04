@@ -102,7 +102,7 @@ function commitChangeSet() {
 			"contentType": "application/json",
 			"type": "POST", 
 			"url": urlPrefix+"changeset/"+selectedChangeSetUri,
-			"data": "{'updatedState':{'state':'FINAL'}}",
+			"data": JSON.stringify({'updateChangeSetMetadataRequest':{'updatedState':{'state':'FINAL'}}}),
 			"error":function (xhr, ajaxOptions, thrownError){
 				alert(xhr.status);
 				alert(xhr.statusText);
@@ -1361,7 +1361,6 @@ function updateChangeSetMetadata(url,changeInstructions,callback){
 				alert(xhr.status);
 				alert(xhr.statusText);
 				alert(xhr.responseText);
-				//alert(jsonString);
 			},
 			"success":callback
 	  });
