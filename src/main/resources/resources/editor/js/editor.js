@@ -216,7 +216,7 @@ fnCodeSystemVersionObjectToArray = function ( )
 				var newJson = new Object();
 				newJson.aaData = new Array();
 				
-				json = json.entryList;
+				json = json.codeSystemVersionCatalogEntryDirectory.entryList;
 				
 				for(i in json){
 					newJson.aaData[i] = new Array();
@@ -1456,7 +1456,7 @@ function doCreateCodeSystemVersion(csvn,about,docuri,versionOf,changeseturi) {
 	};
 	
 	
-	doCreate(json,"codesystemversion",changeseturi);
+	doCreate({"codeSystemVersionCatalogEntry":json},"codesystemversion",changeseturi);
 }
 
 function doCreateMap(mapname,about,changeseturi) {
