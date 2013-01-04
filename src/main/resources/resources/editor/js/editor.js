@@ -894,10 +894,10 @@ $(document).ready(function() {
 		"fnServerData": fnCodeSystemObjectToArray()
 	});
 	
-	$('#editAutocomplete').keyup(function(){
+	$('#cs-editAutocomplete').keyup(function(){
 	    var val = $(this).val();
 	    
-	    var changeSetUri = $('#changeSetDropdown').val();
+	    var changeSetUri = $('#cs-edit-search-changeSetDropdown').val();
 	     
 	    var query = urlPrefix+"codesystems?filtercomponent=resourceName&matchalgorithm=contains&format=json&matchvalue="+val;	
 	    if(changeSetUri != 'CURRENT'){
@@ -1718,7 +1718,7 @@ function addTabsToTemplate(elements) {
 }
 
 function onClearEditSearch(){
-	$('editAutocomplete').val("");
+	$('cs-editAutocomplete').val("");
 	onListAllCodeSystems();
 }
 
@@ -1729,7 +1729,7 @@ function onListAllCodeSystems(changeSetUri){
 		query += ("&changesetcontext="+changeSetUri);
 	}
 	
-	$('#editAutocomplete').val('');
+	$('#cs-editAutocomplete').val('');
 	
 	codeSystemTable.fnReloadAjax(query);
 }
@@ -1741,7 +1741,7 @@ function onListAllCodeSystemVersions(changeSetUri){
 		query += ("&changesetcontext="+changeSetUri);
 	}
 	
-	$('#editAutocomplete').val('');
+	$('#csv-editAutocomplete').val('');
 	
 	codeSystemVersionTable.fnReloadAjax(query);
 }
@@ -1753,7 +1753,7 @@ function onListAllEntities(changeSetUri){
 		query += ("&changesetcontext="+changeSetUri);
 	}
 	
-	$('#editAutocomplete').val('');
+	$('#entity-editAutocomplete').val('');
 	
 	entityTable.fnReloadAjax(query);
 }
