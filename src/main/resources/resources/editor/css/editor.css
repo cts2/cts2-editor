@@ -101,3 +101,7 @@ ul {
 #mapTargetButtonBar {
 	white-space: nowrap;
 }
+
+.ui-state-disabled {
+    opacity: 1.0 !important;
+}
