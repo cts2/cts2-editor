@@ -14,7 +14,7 @@ textarea {
 }
 
 .portlet {
- 	margin: 1em 1em 1em 1em; 
+ 	margin: 1em 1em 1em 1em;
 /*	width: 170px; */
 }
 
@@ -102,6 +102,15 @@ ul {
 	white-space: nowrap;
 }
 
-.ui-state-disabled {
+form .ui-state-disabled {
     opacity: 1.0 !important;
+}
+
+label.error {
+    color: #ff0000;
+    padding-left: 10px;
+}
+
+.comboBox {
+    width: 50px;
 }

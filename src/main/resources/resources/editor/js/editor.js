@@ -18,8 +18,8 @@ var csViewModel;
 var csvViewModel;
 var viewModel;
 
-//var urlPrefix = "../";
-var urlPrefix = "http://localhost:8080/webapp-0.8.2-SNAPSHOT/";
+var urlPrefix = "../";
+//var urlPrefix = "http://localhost:8080/webapp-0.8.2-SNAPSHOT/";
 
 var tab = 0;
 
@@ -29,10 +29,17 @@ var currentMappingMapVersion;
 
 var openChangesets = [];
 
+var EventManager = {
+    subscribe: function(event, fn) {
+        $(this).bind(event, fn);
+    },
+    publish: function(event) {
+        $(this).trigger(event);
+    }
+};
+
 function createNewChangeSet() {
-
     $("#createChangeSetForm").dialog("open");
-
 }
 
 function rollbackChangeSet() {
@@ -52,13 +59,9 @@ function rollbackChangeSet() {
 
             changeSetTable.fnReloadAjax();
 
+            EventManager.publish("afterChangeSetRollback");
         }
     });
-}
-
-function onAfterChangeSetCommit() {
-    loadMapDropdowns();
-    loadCodeSystemVersionDropdowns();
 }
 
 function loadMapDropdowns() {
@@ -105,7 +108,7 @@ function commitChangeSet() {
 
             changeSetTable.fnReloadAjax();
 
-            onAfterChangeSetCommit();
+            EventManager.publish("afterChangeSetCommit");
         }
     });
 }
@@ -157,7 +160,7 @@ fnChangeSetObjectToArray = function () {
 };
 
 function populateChangeSetDropdown($dropdown) {
-    for (i in openChangesets) {
+    for (var i in openChangesets) {
         $dropdown.append($('<option></option>').val(openChangesets[i].changeSetURI).html(openChangesets[i].changeSetURI));
     }
 }
@@ -389,7 +392,6 @@ function createEditCodeSystemDialog() {
         modal:true,
         buttons:{
             "Save!":function () {
-
                 var newJson = ko.mapping.toJS(csViewModel);
 
                 updateCodingScheme(newJson.codeSystemCatalogEntry);
@@ -400,6 +402,15 @@ function createEditCodeSystemDialog() {
         },
         close:function () {
             $("#codeSystemEditForm").dialog('destroy');
+        },
+        open:function () {
+            if($("#codeSystemEditForm").find('.changeSetDropdown option').length == 0){
+                $("#codeSystemEditForm").dialog('option', 'buttons', {
+                    "Close":function () {
+                        $(this).dialog("close");
+                }});
+                $("#no-open-changeset-message").dialog('open');
+            }
         }
     });
 }
@@ -548,8 +559,64 @@ function addPortlet(div, style, name, description) {
     return $(html);
 }
 
+function setupCodesystemAutocomplete(){
+    $('.csAutoComplete').each(function(){
+        var autocomplete = $(this);
+        var $form = autocomplete.closest('.createForm');
+
+        autocomplete.autocomplete(
+            {
+                cache: false,
+                source: function (request, response) {
+                    var changeSetUri = $form.find('.changeSetDropdown').val();
+
+                    var searchTerm = request.term;
+
+                    getCodeSystemNames(changeSetUri, request.term, function (array) {
+                        response(array);
+                    });
+                },
+                delay: 500,
+                minLength: 0
+            }).click(function() {
+                if (this.value == "") {
+                    $(this).autocomplete('search', '');
+                }
+            });
+
+    });
+}
 
 $(document).ready(function () {
+    $("#successful-create-message").dialog({
+        autoOpen:false,
+        modal: true,
+        buttons: {
+            Ok: function() {
+                $( this ).dialog( "close" );
+            }
+        }
+    });
+
+    $("#no-open-changeset-message").dialog({
+        autoOpen:false,
+        modal: true,
+        buttons: {
+            Ok: function() {
+                $( this ).dialog( "close" );
+            }
+        }
+    });
+
+    $.validator.addMethod(
+        "changeSetComboboxCheck",
+        function (value, element) {
+            if (element.value === "") {return false;}
+            else return true;
+        },
+        "Required - select a ChangeSet."
+    );
+
     $("#trashcan").droppable({
         accept:".connectedSourceSortable li, .connectedTargetSortable li",
         hoverClass:"ui-state-hover",
@@ -899,7 +966,8 @@ $(document).ready(function () {
             var index = ui.index;
 
             return true;
-        }
+        },
+        disabled: [2]
     });
 
     $("#editCodeSystem").tabs();
@@ -912,6 +980,12 @@ $(document).ready(function () {
     $("#mapping-tabs-mapversion").tabs();
 
     $('.resourceDescriptionTemplate-edit-tabs').tabs();
+
+    $('.ui-tabs-nav li.ui-state-disabled').each(
+        function(){
+            $(this).attr('title', 'This function is currently under development.');
+        }
+    );
 
     $('#entityTable tbody tr').live('click', function () {
         var aData = entityTable.fnGetData(this);
@@ -1217,6 +1291,21 @@ $(document).ready(function () {
 
         $('#removeButton').button('enable');
     });
+
+    $("form").form();
+
+    //set up custom events
+    $('.dataTable').each(function(){
+        var table = $(this).dataTable();
+        EventManager.subscribe("afterChangeSetRollback", function() {
+            table.fnReloadAjax();
+        });
+        EventManager.subscribe("afterChangeSetCommit", function() {
+            table.fnReloadAjax();
+        });
+    });
+
+    setupCodesystemAutocomplete();
 });
 
 function createCodeSystem() {
@@ -1354,12 +1443,11 @@ function doCreateEntity(name, namespace, about, csname, csvname, changeseturi) {
         }
     };
 
-    doCreate({entityDescription:json}, "entity", changeseturi);
+    doCreate({entityDescription:json}, "entity", changeseturi, null, $('#entityDescriptionCreateForm'));
 }
 
 function doCreate(json, url, changeseturi, oncreate, $form) {
     if(!$form.valid()){
-        alert("Invald!");
         return;
     }
 
@@ -1415,7 +1503,7 @@ function doCreateCodeSystemVersion(csvn, about, docuri, versionOf, changeseturi)
         }
     };
 
-    doCreate({"codeSystemVersionCatalogEntry":json}, "codesystemversion", changeseturi);
+    doCreate({"codeSystemVersionCatalogEntry":json}, "codesystemversion", changeseturi, null, $("#codeSystemVersionCreateForm"));
 }
 
 function doCreateMap(mapname, about, changeseturi) {
@@ -1460,6 +1548,10 @@ function _doCreate(url, json, changeSetUri, oncreate) {
                 oncreate(location);
             }
 
+            $("#successful-create-message").dialog('open');
+
+            EventManager.publish("afterResourceCreate");
+
             log("POST",
                 url + "?changesetcontext=" + changeSetUri,
                 "Creating...");
@@ -1501,7 +1593,6 @@ function updateEntity(json) {
 
         }
     });
-
 }
 
 function updateMap(data) {
@@ -1636,6 +1727,51 @@ function updateCodingScheme(data) {
         }
     });
 
+}
+
+function getCodeSystemVersionNames(changeSetUri, codeSystemName, callback){
+    $.ajax({
+        "dataType":'json',
+        "contentType":"application/json",
+        "type":"GET",
+        "url":urlPrefix + "codesystem/"+codeSystemName+"/versions?format=json&changesetcontext=" + changeSetUri,
+        "error":function (xhr, ajaxOptions, thrownError) {
+            alert("Get CodeSystemVersions error: " + xhr.status);
+        },
+        "success":function (json) {
+            json = json.codeSystemVersionCatalogEntryDirectory.entryList;
+
+            var names = [];
+            for (var i in json) {
+                names.push(json[i].codeSystemVersionName);
+            }
+
+            callback(names);
+        }
+    });
+}
+
+function getCodeSystemNames(changeSetUri, searchString, callback){
+    var queryUrl = searchString != "" ? "matchvalue="+searchString+"&filtercomponent=resourceName&" : "";
+    $.ajax({
+        "dataType":'json',
+        "contentType":"application/json",
+        "type":"GET",
+        "url":urlPrefix + "codesystems?format=json&"+queryUrl+"changesetcontext=" + changeSetUri,
+        "error":function (xhr, ajaxOptions, thrownError) {
+            alert("Get CodeSystem error: " + xhr.status);
+        },
+        "success":function (json) {
+            json = json.codeSystemCatalogEntryDirectory.entryList;
+
+            var names = [];
+            for (var i in json) {
+                names.push(json[i].codeSystemName);
+            }
+
+            callback(names);
+        }
+    });
 }
 
 function addTabsToTemplate(elements) {

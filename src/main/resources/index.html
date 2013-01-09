@@ -29,7 +29,7 @@
     <script>
         $(function () {
 
-            $("form").form();
+            //$("form").form();
 
         });
     </script>
@@ -144,7 +144,7 @@
     <input type="submit" value="Commit" onclick="commitChangeSet();"/> <br>
     <input type="submit" value="Create New ChangeSet"
            onclick="createNewChangeSet();"/>
-    <table id="changeSetTable" class="display">
+    <table id="changeSetTable" class="dataTable display">
         <thead>
         <tr>
             <th>ChangeSetUri</th>
@@ -177,17 +177,16 @@
         <label id="csAboutLabel"><b>About:</b> <span
                 data-bind="text: codeSystemCatalogEntry.about"></span></label> <br>
 
+        <form id="codeSystemEditFormForm" class="ui-widget">
 
-        <fieldset id="cs-chooseChangeSetForEditFieldset"
-                  class="ui-widget-content" title="ChangeSet">
-            <legend class="ui-widget-header ui-corner-all">ChangeSet</legend>
-            <label for="cs-edit-choose-changeSetDropdown"><b>ChangeSet:</b></label>
-            <select id="cs-edit-choose-changeSetDropdown"
-                    class="changeSetDropdown"
-                    name="cs-edit-choose-changeSetDropdown"></select>
-        </fieldset>
-
-        <form class="ui-widget">
+            <fieldset id="cs-chooseChangeSetForEditFieldset"
+                      class="ui-widget-content" title="ChangeSet">
+                <legend class="ui-widget-header ui-corner-all">ChangeSet</legend>
+                <label for="cs-edit-choose-changeSetDropdown"><b>ChangeSet:</b></label>
+                <select id="cs-edit-choose-changeSetDropdown"
+                        class="changeSetDropdown changeSetComboboxCheck"
+                        name="cs-edit-choose-changeSetDropdown"></select>
+            </fieldset>
 
             <div class="resourceDescriptionTemplate-edit-tabs">
                 <ul>
@@ -207,18 +206,17 @@
 
     <div id="cs-tabs-1">
 
-
         <label for="cs-edit-search-changeSetDropdown">ChangeSet: </label> <select
             id="cs-edit-search-changeSetDropdown"
             name="cs-edit-search-changeSetDropdown"
             data-getAllFunctionName="onListAllCodeSystems"
-            class="AddCurrentOption changeSetDropdown"></select> <br> <label
+            class="AddCurrentOption changeSetDropdown changeSetComboboxCheck"></select> <br> <label
             for="cs-editAutocomplete">Search: </label> <input
             id="cs-editAutocomplete"/> <input type="submit" id="csClearSearch"
                                               value="Clear Search" name="clearSearch"
                                               onclick="onClearEditSearch()"/> <br>
 
-        <table id="codeSystemTable" class="display">
+        <table id="codeSystemTable" class="dataTable display">
             <thead>
             <tr>
                 <th>CodeSystem Name</th>
@@ -230,12 +228,13 @@
     </div>
     <div id="cs-tabs-2">
 
-        <label for="cs-create-changeSetDropdown">ChangeSet: </label> <select
-            class="changeSetDropdown"
-            id="cs-create-changeSetDropdown">
-    </select>
-
         <form id="codeSystemCreateForm" style="width: 50%">
+
+            <label for="cs-create-changeSetDropdown">ChangeSet: </label>
+            <select
+                    class="changeSetDropdown changeSetComboboxCheck"
+                    id="cs-create-changeSetDropdown">
+            </select>
 
             <fieldset>
                 <legend>Create</legend>
@@ -248,7 +247,6 @@
                         <td>About</td>
                         <td><input id="about" name="about" class="required" type="text"/></td>
                     </tr>
-
 
                     <tr>
                         <td><input type="submit" value="Create"
@@ -306,7 +304,6 @@
 
     <div id="csv-tabs-1">
 
-
         <label for="csv-edit-search-changeSetDropdown">ChangeSet: </label> <select
             id="csv-edit-search-changeSetDropdown"
             name="csv-edit-search-changeSetDropdown"
@@ -317,7 +314,7 @@
                                                value="Clear Search" name="clearSearch"
                                                onclick="onClearEditSearch()"/> <br>
 
-        <table id="codeSystemVersionTable" class="display">
+        <table id="codeSystemVersionTable" class="dataTable display">
             <thead>
             <tr>
                 <th>CodeSystem Name</th>
@@ -330,31 +327,31 @@
     </div>
     <div id="csv-tabs-2">
 
-        <label for="csv-create-changeSetDropdown">ChangeSet: </label> <select
-            class="changeSetDropdown"
-            id="csv-create-changeSetDropdown">
-    </select>
+        <form id="codeSystemVersionCreateForm" style="width: 50%" class="createForm">
 
-        <form style="width: 50%">
+            <label for="csv-create-changeSetDropdown">ChangeSet: </label>
+            <select
+                class="changeSetDropdown changeSetComboboxCheck"
+                id="csv-create-changeSetDropdown"></select>
 
             <fieldset>
                 <legend>Create</legend>
                 <table>
                     <tr>
                         <td>Code System Version Name</td>
-                        <td><input id="csvn" name="csn" type="text"/></td>
+                        <td><input id="csvn" name="csn" class="required" type="text"/></td>
                     </tr>
                     <tr>
                         <td>About</td>
-                        <td><input id="csvabout" name="csvabout" type="text"/></td>
+                        <td><input id="csvabout" name="csvabout" class="required" type="text"/></td>
                     </tr>
                     <tr>
                         <td>Document URI</td>
-                        <td><input id="docuri" name="docuri" type="text"/></td>
+                        <td><input id="docuri" name="docuri" class="required" type="text"/></td>
                     </tr>
                     <tr>
                         <td>Version Of</td>
-                        <td><input id="csvversionof" name="csvversionof" type="text"/></td>
+                        <td><input id="csvversionof" name="csvversionof" class="required csAutoComplete" type="text"/></td>
                     </tr>
 
                     <tr>
@@ -376,7 +373,6 @@
     <ul>
         <li><a href="#ed-tabs-1">Edit</a></li>
         <li><a href="#ed-tabs-2">Create New</a></li>
-        <li><a href="#ed-tabs-4">Search</a></li>
     </ul>
 
     <div id="entityEditForm" title="Edit Entity">
@@ -485,40 +481,36 @@
     </div>
     <div id="ed-tabs-2">
 
-        <label for="ed-create-changeSetDropdown">ChangeSet: </label> <select
-            class="changeSetDropdown"
-            id="ed-create-changeSetDropdown">
-    </select>
-
-        <form style="width: 50%">
+        <form id="entityDescriptionCreateForm" class="createForm" style="width: 50%">
+            <label for="ed-create-changeSetDropdown">ChangeSet:</label>
+            <select
+                class="changeSetDropdown changeSetComboboxCheck"
+                id="ed-create-changeSetDropdown">
+            </select>
 
             <fieldset>
                 <legend>Create</legend>
                 <table>
                     <tr>
                         <td>Entity Name</td>
-                        <td><input id="entityName" name="entityName" type="text"/></td>
+                        <td><input id="entityName" name="entityName" class="required" type="text"/></td>
                     </tr>
                     <tr>
                         <td>Entity Namespace</td>
-                        <td><input id="entityNamespace" name="entityNamespace"
-                                   type="text"/></td>
+                        <td><input id="entityNamespace" name="entityNamespace" class="required" type="text"/></td>
                     </tr>
                     <tr>
                         <td>About</td>
-                        <td><input id="entityNameAbout" name="entityNameAbout"
-                                   type="text"/></td>
+                        <td><input id="entityNameAbout" name="entityNameAbout" class="required"/></td>
                     </tr>
                     <tr>
                         <td>Code System</td>
-                        <td><input type="text" id="entityCsSelect" name="entityCsSelect">
-                            </input>
+                        <td><input id="entityCsSelect" class="required csAutoComplete" name="entityCsSelect" type="text"/>
                         </td>
                     </tr>
                     <tr>
                         <td>Code System Version</td>
-                        <td><input type="text" id="entityCsvSelect" name="entityCsvSelect">
-                            </input>
+                        <td><input id="entityCsvSelect" class="required" name="entityCsvSelect" type="text"/>
                         </td>
                     </tr>
 
@@ -866,10 +858,17 @@
           readonly="readonly" rows="5">
 </textarea>
 
-<script type="text/javascript"
-        src="resources/editor/js/themeswitchertool.js">
+<div id="successful-create-message" title="Successful Create">
+    <p>
+        <b>The resource has been successfully created.</b>.
+    </p>
+</div>
 
-</script>
+<div id="no-open-changeset-message" title="No Open ChangeSets">
+    <p>
+        <b>There are no open ChangeSets. This resource will remain read-only until at least one open ChangeSet is available.</b>.
+    </p>
+</div>
 
 <!-- 	Hidden divs for cloning -->
 <div style="display:none">
