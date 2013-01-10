@@ -38,6 +38,14 @@ var EventManager = {
     }
 };
 
+var delay = (function(){
+    var timer = 0;
+    return function(callback, ms){
+        clearTimeout (timer);
+        timer = setTimeout(callback, ms);
+    };
+})();
+
 function createNewChangeSet() {
     $("#createChangeSetForm").dialog("open");
 }
@@ -935,29 +943,18 @@ $(document).ready(function () {
     });
 
     $('#cs-editAutocomplete').keyup(function () {
-        var val = $(this).val();
+        delay(function(){
+            var val = $('#cs-editAutocomplete').val();
 
-        var changeSetUri = $('#cs-edit-search-changeSetDropdown').val();
+            var changeSetUri = $('#cs-edit-search-changeSetDropdown').val();
 
-        var query = urlPrefix + "codesystems?filtercomponent=resourceName&matchalgorithm=contains&format=json&matchvalue=" + val;
-        if (changeSetUri != 'CURRENT') {
-            query += "&changesetcontext=" + changeSetUri;
-        }
+            var query = urlPrefix + "codesystems?filtercomponent=resourceName&matchalgorithm=contains&format=json&matchvalue=" + val;
+            if (changeSetUri != 'CURRENT') {
+                query += "&changesetcontext=" + changeSetUri;
+            }
 
-        codeSystemTable.fnReloadAjax(query);
-    });
-
-    $('#searchAutocomplete').keyup(function () {
-        var val = $(this).val();
-
-        var changeSetUri = $('#searchChangeSetDropdown').val();
-
-        var query = urlPrefix + "codesystems?filtercomponent=resourceName&matchalgorithm=contains&format=json&matchvalue=" + val;
-        if (changeSetUri != 'CURRENT') {
-            query += "&changesetcontext='" + changeSetUri + "'";
-        }
-
-        autocompleteTable.fnReloadAjax(query);
+            codeSystemTable.fnReloadAjax(query);
+        }, 1000 );
     });
 
     $("#resourceTabs").tabs({
